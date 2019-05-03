@@ -5,6 +5,8 @@ namespace MyApp;
 
 class ImageUploader {
 
+    private $_imageFileName;
+    
     public function upload() {
         try {
             // error check
@@ -12,18 +14,41 @@ class ImageUploader {
             // type check
             $ext = $this->_validateImageType();
 
-            var_dump($ext);
-            exit;
+            // var_dump($ext);
+            // exit;
             // save
+            $savePath = $this->_save($ext);
             // create thumbnail
+            $this->_createTumbnail($savePath);
+
         } catch(\Exception $e) {
             echo $e->getMessage();
             exit;
         }
 
-        // redirect
         header('Location: http://' . $_SERVER['HTTP_HOST']);
         exit;
+    }
+
+    private function _cretaeThumbnail($savePath) {
+        $iamgesize  = getimagesize($savePath);
+        $width      = $imageSize[0];
+        $height     = $imageSize[1];
+    }
+
+    private function _save($ext) {
+
+        $this->_imageFileName = sprintf(
+            '%s_%s.%s',
+            time(),
+            sha1(uniqid(mt_rand(), true)),
+            $ext
+        );
+        $savePath = IMAGES_DIR . '/' . $this->_imageFileName;
+        $res = move_uploaded_file($_FILES['image']['tmp_name'], $savePath);
+        if ($res === false) {
+            throw new \Exception('Could not upload!');
+        }
     }
 
     private function _validateImageType() {
@@ -40,10 +65,6 @@ class ImageUploader {
         }
     }
 
-
-    
-    
-
     private function _validateUpload() {
         // var_dump($_FILES);
         // exit;
@@ -53,13 +74,13 @@ class ImageUploader {
         }
 
         switch ($_FILES['image']['error']) {
-            case 'UPLOAD_ERR_OK':
+            case UPLOAD_ERR_OK:
                 return true;
-            case UPLOAD_ERR_INT_SIZE:
+            case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
                 throw new \Exception('File too large!');
             default:
-                throw new \Exception("Err: " . $_FILES['image']['error']);
+                throw new \Exception('Err: ' . $_FILES['image']['error']);
         }
     }
 }
