@@ -1,7 +1,9 @@
 <?php
 
+session_start();
+
 ini_set('display_errors', 1);
-define('MAX_FILE_SIZE', 1 * 1024 * 1024);
+define('MAX_FILE_SIZE', 1 * 1024 * 1024); // 1MB
 define('THUMBNAIL_WIDTH', 400);
 define('IMAGES_DIR', __DIR__ . '/images');
 define('THUMBNAIL_DIR', __DIR__ . '/thumbs');
@@ -29,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     $uploader->upload();
 }
 
+list($success, $error) = $uploader->getResults();
 $images = $uploader->getImages();
 
 ?>
@@ -62,6 +65,12 @@ $images = $uploader->getImages();
         <input type="submit" value="upload">
     </form>
 
+    <?php if (isset($success)) : ?>
+        <div class="msg success"><?php echo h($success); ?></div>
+    <?php endif; ?>
+    <?php if (isset($error)) : ?>
+        <div class="msg error"><?php echo h($error); ?></div>
+    <?php endif; ?>
     <ul>
         <?php foreach ($images as $image) : ?>
             <li>
@@ -71,5 +80,11 @@ $images = $uploader->getImages();
             </li>
         <?php endforeach; ?>
     </ul>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+$(function() {
+  $('.msg').fadeOut(3000);
+});
+</script>
 </body>
 </html>
