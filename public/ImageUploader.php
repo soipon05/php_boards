@@ -6,6 +6,7 @@ namespace MyApp;
 class ImageUploader {
 
     private $_imageFileName;
+    private $_imageType;
     
     public function upload() {
         try {
@@ -19,7 +20,7 @@ class ImageUploader {
             // save
             $savePath = $this->_save($ext);
             // create thumbnail
-            $this->_createTumbnail($savePath);
+            $this->_createThumbnail($savePath);
 
         } catch(\Exception $e) {
             echo $e->getMessage();
@@ -30,10 +31,43 @@ class ImageUploader {
         exit;
     }
 
-    private function _cretaeThumbnail($savePath) {
-        $iamgesize  = getimagesize($savePath);
+    private function _createThumbnail($savePath) {
+        $imageSize  = getimagesize($savePath);
         $width      = $imageSize[0];
         $height     = $imageSize[1];
+        if ($width > THUMBNAIL_WIDTH) {
+            $this->_createThumbnailMain($savePath, $width, $height);
+        }
+    }
+
+    private function _createThumbnailMain($savePath, $width, $height) {
+        switch ($this->_imageType) {
+            case IMAGETYPE_GIF:
+                $srcImage = imagecreatefromgif($savePath);
+                break;
+            case IMAGETYPE_JPEG:
+                $srcImage = imagecreatefromjpeg($savePath);
+                break;
+            case IMAGETYPE_PNG:
+                $srcImage = imagecreatefrompng($savePath);
+                break;
+        }
+        $thumbHeight = round($height * THUMBNAIL_WIDTH / $width);
+        $thumbImage  = imagecreatetruecolor(THUMBNAIL_WIDTH, $thumbHeight);
+        imagecopyresampled($thumbImage, $srcImage, 0, 0, 0, 0, THUMBNAIL_WIDTH, $thumbHeight, $width, $height);
+        
+        switch($this->_imageType) {
+            case IMAGETYPE_GIF:
+                imagegif($thumbImage, THUMBNAIL_DIR . '/' . $this->_imageFileName);
+                break;
+            case IMAGETYPE_JPEG:
+                imagejpeg($thumbImage, THUMBNAIL_DIR . '/' . $this->_imageFileName);
+                break;
+            case IMAGETYPE_PNG:
+                imagepng($thumbImage, THUMBNAIL_DIR . '/' . $this->_imageFileName);
+                break;
+        }
+
     }
 
     private function _save($ext) {
@@ -49,11 +83,12 @@ class ImageUploader {
         if ($res === false) {
             throw new \Exception('Could not upload!');
         }
+        return $savePath;
     }
 
     private function _validateImageType() {
-        $imageType = exif_imagetype($_FILES['image']['tmp_name']);
-        switch ($imageType) {
+        $this->_imageType = exif_imagetype($_FILES['image']['tmp_name']);
+        switch ($this->_imageType) {
             case IMAGETYPE_GIF:
                 return 'gif';
             case IMAGETYPE_JPEG:
