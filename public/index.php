@@ -11,13 +11,19 @@ if (!function_exists('imagecreatetruecolor')) {
     exit;
 }
 
+// if (function_exists('exif_imagetype')) {
+//     echo "This function is installed";
+// } else {
+//     echo "It is not";
+// }
+
 function h($s) {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
 require 'ImageUploader.php';
 
-$uploader = new \Myapp\ImageUploader();
+$uploader = new \MyApp\ImageUploader();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     $uploader->upload();
@@ -41,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 <body>
     
     <form action="" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="MAX_FILE_SIZE" value="<?php h(MAX_FILE_SIZE); ?>">
+    <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo h(MAX_FILE_SIZE); ?>">
     <input type="file" name="image">
     <input type="submit" value="upload">
     </form>

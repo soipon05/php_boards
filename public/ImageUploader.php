@@ -1,6 +1,7 @@
 <?php
 
-namespace Myapp;
+namespace MyApp;
+// phpinfo();
 
 class ImageUploader {
 
@@ -10,6 +11,9 @@ class ImageUploader {
             $this->_validateUpload();
             // type check
             $ext = $this->_validateImageType();
+
+            var_dump($ext);
+            exit;
             // save
             // create thumbnail
         } catch(\Exception $e) {
@@ -23,7 +27,7 @@ class ImageUploader {
     }
 
     private function _validateImageType() {
-        $imageType = exif_image($_FILES['image']['tmp_name']);
+        $imageType = exif_imagetype($_FILES['image']['tmp_name']);
         switch ($imageType) {
             case IMAGETYPE_GIF:
                 return 'gif';
@@ -35,6 +39,8 @@ class ImageUploader {
                 throw new \Exception('PNG/JPEG/GIF only!');
         }
     }
+
+
     
     
 
@@ -42,7 +48,7 @@ class ImageUploader {
         // var_dump($_FILES);
         // exit;
 
-        if (!isset($_FILES['images']) || !isset($_FILES['image']['errors'])) {
+        if (!isset($_FILES['image']) || !isset($_FILES['image']['error'])) {
             throw new \Exception('Upload Error!');
         }
 
